@@ -26,9 +26,7 @@ app.post('/api/sanitize', (req, res, next) => {
 
     // Ensure we are working with an object or array
     const parsedData = typeof payload === 'string' ? JSON.parse(payload) : payload;
-    const flattened = options?.flatten === true;
-
-    const sanitized = sanitizePayload(parsedData, flattened);
+    const sanitized = sanitizePayload(parsedData, options || {});
 
     return res.status(200).json({
       success: true,

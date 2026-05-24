@@ -6,11 +6,12 @@ import Results from './components/Results';
 export default function App() {
   const [inputJson, setInputJson] = useState('');
   const [flatten, setFlatten] = useState(false);
+  const [preserveArrayNulls, setPreserveArrayNulls] = useState(false);
   const { submitPayload, result, error, loading } = usePayloadSubmit();
 
   const handleProcess = (e) => {
     e.preventDefault();
-    submitPayload(inputJson, { flatten });
+    submitPayload(inputJson, { flatten, preserveArrayNulls });
   };
 
   return (
@@ -34,6 +35,8 @@ export default function App() {
           setInputJson={setInputJson}
           flatten={flatten}
           setFlatten={setFlatten}
+          preserveArrayNulls={preserveArrayNulls}
+          setPreserveArrayNulls={setPreserveArrayNulls}
           loading={loading}
           onSubmit={handleProcess}
         />

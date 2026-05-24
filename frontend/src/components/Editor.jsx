@@ -63,7 +63,7 @@ const PRESETS = {
   }
 };
 
-export default function Editor({ inputJson, setInputJson, flatten, setFlatten, loading, onSubmit }) {
+export default function Editor({ inputJson, setInputJson, flatten, setFlatten, preserveArrayNulls, setPreserveArrayNulls, loading, onSubmit }) {
   const [isValidJson, setIsValidJson] = useState(true);
   const [jsonError, setJsonError] = useState('');
 
@@ -139,16 +139,29 @@ export default function Editor({ inputJson, setInputJson, flatten, setFlatten, l
         )}
 
         <div className="controls-row">
-          <label className="toggle-container">
-            <input
-              type="checkbox"
-              checked={flatten}
-              onChange={(e) => setFlatten(e.target.checked)}
-              className="toggle-input"
-            />
-            <span className="toggle-slider"></span>
-            <span className="toggle-label">Flatten nested properties (undescore separation)</span>
-          </label>
+          <div className="toggles-group">
+            <label className="toggle-container">
+              <input
+                type="checkbox"
+                checked={flatten}
+                onChange={(e) => setFlatten(e.target.checked)}
+                className="toggle-input"
+              />
+              <span className="toggle-slider"></span>
+              <span className="toggle-label">Flatten nested properties (underscore separation)</span>
+            </label>
+
+            <label className="toggle-container">
+              <input
+                type="checkbox"
+                checked={preserveArrayNulls}
+                onChange={(e) => setPreserveArrayNulls(e.target.checked)}
+                className="toggle-input"
+              />
+              <span className="toggle-slider"></span>
+              <span className="toggle-label">Preserve array alignments (empty values as null)</span>
+            </label>
+          </div>
 
           <button
             type="submit"

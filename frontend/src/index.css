@@ -382,6 +382,13 @@ body {
   color: var(--text-primary);
 }
 
+.toggles-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+
 /* Submit Button */
 .submit-btn {
   background: linear-gradient(135deg, var(--primary) 0%, hsl(280, 85%, 55%) 100%);
