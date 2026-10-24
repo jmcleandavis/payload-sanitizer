@@ -29,13 +29,16 @@ export function sanitizePayload(input, flatten = false, options = {}) {
   // Support both (input, flatten, options) and (input, options) signatures
   let shouldFlatten = false;
   let preserveArrayNulls = false;
+  let excludeKeys = [];
 
   if (typeof flatten === 'boolean') {
     shouldFlatten = flatten;
     preserveArrayNulls = options?.preserveArrayNulls === true;
+    excludeKeys = options?.excludeKeys || [];
   } else if (flatten && typeof flatten === 'object') {
     shouldFlatten = flatten.flatten === true;
     preserveArrayNulls = flatten.preserveArrayNulls === true;
+    excludeKeys = flatten.excludeKeys || [];
     options = flatten;
   }
 
@@ -45,7 +48,7 @@ export function sanitizePayload(input, flatten = false, options = {}) {
   }
 
   if (Array.isArray(input)) {
-    const mapped = input.map(item => sanitizePayload(item, shouldFlatten, options));
+    const mapped = input.map(item => sanitizePayload(item, shouldFlatten, { ...options, excludeKeys }));
     if (preserveArrayNulls) {
       // Map empty elements (null, undefined, '') to null to preserve array index alignments
       return mapped.map(item => (item === null || item === undefined || item === '') ? null : item);
@@ -57,11 +60,16 @@ export function sanitizePayload(input, flatten = false, options = {}) {
   // Handle plain objects
   const cleaned = {};
   for (const [key, value] of Object.entries(input)) {
+    if (excludeKeys.includes(key)) {
+      cleaned[key] = value;
+      continue;
+    }
+
     if (value === null || value === undefined || value === '') {
       continue; // Skip keys with empty values
     }
 
-    const processedValue = sanitizePayload(value, shouldFlatten, options);
+    const processedValue = sanitizePayload(value, shouldFlatten, { ...options, excludeKeys });
 
     // Skip empty nested objects if they were completely stripped, unless they are non-plain objects
     if (isPlainObject(processedValue) && Object.keys(processedValue).length === 0) {

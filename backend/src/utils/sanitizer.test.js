@@ -85,3 +85,106 @@ test('Optimization C: Hardening Object Validations', async (t) => {
     assert.strictEqual(result.plain.key, "value");
   });
 });
+test('New Feature: Exclude Keys from Sanitization', async (t) => {
+  await t.test('should exclude specified keys from sanitization', () => {
+    const input = {
+      id: 1,
+      name: "Test",
+      description: "",
+      details: {
+        version: null,
+        status: "active"
+      },
+      secret: "keep_this_value"
+    };
+    const result = sanitizePayload(input, { excludeKeys: ["secret"] });
+    assert.deepStrictEqual(result, {
+      id: 1,
+      name: "Test",
+      details: {
+        status: "active"
+      },
+      secret: "keep_this_value"
+    });
+  });
+
+  await t.test('should exclude specified keys from sanitization even if nested', () => {
+    const input = {
+      user: {
+        id: 123,
+        name: "John Doe",
+        email: "",
+        settings: {
+          theme: "dark",
+          notifications: null,
+          apiKey: "super_secret_key"
+        }
+      }
+    };
+    const result = sanitizePayload(input, { excludeKeys: ["apiKey"] });
+    assert.deepStrictEqual(result, {
+      user: {
+        id: 123,
+        name: "John Doe",
+        settings: {
+          theme: "dark",
+          apiKey: "super_secret_key"
+        }
+      }
+    });
+  });
+
+  await t.test('should work with flattening and excluded keys', () => {
+    const input = {
+      user: {
+        id: 123,
+        name: "John Doe",
+        email: "",
+        settings: {
+          theme: "dark",
+          notifications: null,
+          apiKey: "super_secret_key"
+        }
+      },
+      system: {
+        version: "1.0",
+        debugInfo: null
+      }
+    };
+    const result = sanitizePayload(input, { flatten: true, excludeKeys: ["apiKey"] });
+    assert.deepStrictEqual(result, {
+      user_id: 123,
+      user_name: "John Doe",
+      user_settings_theme: "dark",
+      user_settings_apiKey: "super_secret_key",
+      system_version: "1.0"
+    });
+  });
+
+  await t.test('should handle multiple excluded keys', () => {
+    const input = {
+      a: 1,
+      b: null,
+      c: "",
+      d: "value",
+      e: {
+        f: null,
+        g: "nested_value",
+        h: ""
+      },
+      i: "protected_i",
+      j: "protected_j"
+    };
+    const result = sanitizePayload(input, { excludeKeys: ["i", "j", "h"] });
+    assert.deepStrictEqual(result, {
+      a: 1,
+      d: "value",
+      e: {
+        g: "nested_value",
+        h: ""
+      },
+      i: "protected_i",
+      j: "protected_j"
+    });
+  });
+});
